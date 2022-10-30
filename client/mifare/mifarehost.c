@@ -539,9 +539,19 @@ int mfnested(uint8_t blockNo, uint8_t keyType, uint16_t timeout14a, uint8_t *key
 
 	uint8_t num_unique_nonces;
 	uint32_t fixed_nt = 0;
+	// Added for saving the real fixed_nt, Tommy, 2021-07-29
+	static uint32_t fixed_nt_tommy = 0;
+
 	if (statelists[0].nt == statelists[1].nt && statelists[0].ks1 == statelists[1].ks1) {
 		num_unique_nonces = 1;
 		memcpy(&fixed_nt, resp.d.asBytes + 24, 4);
+
+		// If fixed_nt == 0, use the last known fixed_nt, Tommy, 2021-07-29
+		if (fixed_nt == 0)
+			fixed_nt = fixed_nt_tommy;
+		else
+			fixed_nt_tommy = fixed_nt;
+
 		PrintAndLog("Fixed nt detected: %08" PRIx32 " on first authentication, %08" PRIx32 " on nested authentication", fixed_nt, statelists[0].nt);
 	} else {
 		num_unique_nonces = 2;
